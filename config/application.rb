@@ -6,26 +6,22 @@ module PersonApp
       response = Rack::Response.new
       response_body = ""
 
-      puts "request.path_info  = #{request.path_info}"
-      
-      # Set the HTTP Response Content-Type to Plain text
-      # response.header['Content-Type'] = 'text/plain'
-
+      # Simple router
+      # Will HTTP Methods and Paths to Controller, class, actions, methods.
       if request.request_method == 'GET'
-        if request.path_info == '/people'
-          response_body = PersonApp::PersonController.new.index
-        elsif request.path_info =~ /\/people\/+\d/
-
-          params = {id: request.path_info.split('/').last.to_i }
-          puts "params = #{params}"
-
-          person_controller = PersonApp::PersonController.new
-          person_controller.params = params
-          response_body = person_controller.show
-        else
-          puts "Undefined route"
-          response_body = "Undefined route"
-        end
+        response_body = Router.dispatch(request)
+        # if request.path_info =~ /\/people\/+\d/
+        #   # Person Controller show action          
+        #   # params = {id: request.path_info.split('/').last.to_i }
+        #   params = Utils.extract_params(request, request.path_info)
+        #   puts "params = #{params}"
+        #   person_controller = PersonApp::PersonController.new
+        #   person_controller.params = params
+        #   response_body = person_controller.show
+        # else
+        #   puts "Undefined route"
+        #   response_body = "Undefined route"
+        # end
         response.write(response_body)
       end
       response.finish
