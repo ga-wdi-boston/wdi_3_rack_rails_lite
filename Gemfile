@@ -7,3 +7,4 @@ gem 'rack'
 gem 'pry'
 gem 'pry-byebug'
 
+gem 'faker'
