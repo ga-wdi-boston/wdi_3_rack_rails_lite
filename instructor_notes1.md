@@ -1,3 +1,26 @@
+#### Building Rails Lite
+
+We are going to build an application from Ruby, Rack and ActiveSupport. 
+
+The objective of this lesson is show how Rails works from the inside. This will incrementally build a _Lite_ version of some of the Rails components. 
+
+It will:  
+* Create an Rails _like_ initialization process.  
+* Use the Rails directory structure.  
+* Create a Rackup to process HTTP Requests.  
+* Implementing a simple Router that will _dispatch_ HTTP Requests to the correct controller and action.  
+* Implement a Controller and two actions, (index and show).  
+* Implement a view using a _render_ method and erubis.
+
+
+We've already seen Rack.  
+
+ActiveSupport is one of the gems that make up RubyOnRails. It will extend a set of Ruby files, (Array, Hash, String, ..), and provide some naming and other behavior. Feel free to checkout ActiveSupport.
+
+Later we'll also be using the Erubis gem that will provide _Templating_ to generate a HTML _Representation_ of our resources.  
+
+Rails uses ERB for Templating but Erubis is very similar.
+
 #### Add ActiveSupport.
 
 ActiveSupport is one of the gems used in rails. It creates a set of methods that extend Ruby classes. Check out the docs for ActiveSupport.
@@ -24,13 +47,13 @@ mkdir config
 
 * A collection of other ruby files are keep in the lib directory.  
 
-	We are, _unlike in Rails_, create a lib/rails dir that will contain ruby that typically is provided by one of the rails gems.
+	We are, _unlike in Rails_, creating a lib/rails dir that will contain ruby that typically is provided by one of the rails gems.
 
 ```
 mkdir lib
 mkdir -p lib/rails
 ```
-### Create a config.ru
+### Create a Rackup, config.ru
 Create a rackup. This will initialize, or _bring up_, the application when the rackup command is invoked on the command line.
 
 ```
@@ -71,7 +94,7 @@ require_relative "./application.rb"
 
 Create a config/application.rb 
 
-This will look at the HTTP Method and path to determine what to do.
+This will look at the HTTP Request method and path to determine what to do.
 
 It's a very simple router. 
 
@@ -118,7 +141,7 @@ module PersonApp
 end
 ```
 
-Goto http://localhost:3000/people and http://localhost:3000/people/4.
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
 
 
 ### Create a PeopleController.
@@ -152,6 +175,9 @@ end
 ```
 
 This will route to the correct Controller and action.
+
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
+
 
 #### Handle HTTRequest params for the show action.
 
@@ -193,6 +219,8 @@ def show
 end
 
 ```
+
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
 
 
 ### Create a (fake) Peson model.
@@ -329,6 +357,99 @@ module PersonApp
   end
 end
 ```
+
+## View Templates for Rendering.
+
+We are going to use Erubis, _much like ERB in Rails_ , for a templating library. 
+
+Templates generate HTML but can __also__ have ruby embedded in them. We'll see how this works below.
+
+
+##### Install the erubis gem and require it.
+
+* In the Gemfile. 
+
+```
+gem 'erubis'
+```
+
+Run bundle install.
+
+* In the config/environment.rb file add the below after $RAILS_ROOT.  
+
+```
+ # Get active support help                                                   
+require 'active_support/all'
+
+ # For view templates.                                                       
+require 'erubis'
+```
+
+#### Use erubis to render.
+
+In the app/controllers/application_controller.rb. Remove the render method and replace it with the below.
+
+```
+...
+
+attr_accessor :params, :controller, :action
+...
+
+def controller
+  @controller = self.class.name.split("Controller").first
+  # remove the module name
+  @controller = @controller.split("::").last.underscore
+end
+
+def view_filename
+  "#{$RAILS_ROOT}/app/views/#{self.controller}/#{self.action}.html.erb"
+end
+
+def render(view_name, locals = {})
+  self.action = calling_method = caller[0].split("`").pop.gsub("'", "")     
+  template = File.read(view_filename)
+  eruby = Erubis::Eruby.new(template)
+  eruby.result(binding())
+end
+
+```
+
+##### Create the Views for people.
+
+View templates alway live in the app/views/<resource>/<action>.html.erb files.
+
+
+```
+mkdir -p app/views/people
+touch app/views/people/show.html.erb
+touch app/views/people/index.html.erb
+```
+
+Add the contents to the show view.
+
+In app/views/people/show.html.erb.  
+
+```
+<dt><%= @person.name %> </dt>
+<dd><%= @person.description %> is <%= @person.age %> years old</dd>
+
+```
+
+
+In app/views/people/index.html.erb 
+
+```
+	<dl>
+	  <% @people.each do |person| %>
+	    <dt><%= person.name %> </dt>
+	    <dd><%= person.description %> is <%= person.age %> years old</dd>
+	  <% end %>
+	</dl>
+```
+
+
+
+
 
 
 

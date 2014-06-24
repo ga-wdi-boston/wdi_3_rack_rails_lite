@@ -1,0 +1,6 @@
+<dl>
+<% @people.each do |person| %>
+  <dt><%= person.name %> </dt>
+  <dd><%= person.description %> is <%= person.age %> years old</dd>
+<% end %>
+</dl>
