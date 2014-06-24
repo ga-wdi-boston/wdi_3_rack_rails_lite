@@ -19,9 +19,11 @@ module PersonApp
       controller_name, action_name = controller_action_str.split('#')
 
       # Form the Controller class name
+      # 'person' to "PeopleController"
       controller_name =  controller_name.pluralize.camelize + 'Controller'
 
-      # Get the controller class from name, "PersonController"
+      # Get the controller class from name,
+      # "PeopleController" to PersonApp::PeopleController class
       controller_klass = ::PersonApp.const_get(controller_name)
 
       # Add the mapping from the URL path to the controller and action.
