@@ -288,5 +288,47 @@ Set the HTTP Response Content Type to html.
 
 ```
 
+### Refactor the rendering.
+
+In the app/controllers/application_controller.rb.  
+
+Add a method to render. 
+
+```
+def render(object)
+      content = LAYOUT_HTML_PRE
+      if object.respond_to?(:each)
+        object.each do |model|
+          content += model.to_html          
+        end
+      else
+        content += object.to_html
+      end
+      content += LAYOUT_HTML_POST
+end
+```
+
+
+Update the app/controllers/people_controller.rb.  
+
+```
+module PersonApp
+  class PeopleController < ApplicationController
+
+    def index
+      @people = Person.all
+
+      # render the HTML
+      render @people
+    end
+
+    def show 
+      @person = Person.find(params[:id])
+      render @person
+    end
+  end
+end
+```
+
 
 
