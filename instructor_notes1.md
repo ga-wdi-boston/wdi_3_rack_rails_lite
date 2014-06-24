@@ -69,24 +69,127 @@ require_relative "./application.rb"
 
 ### Create the Application class. This defines the Rack application. _Mucho importante_.
 
-Create a config/application.rb  
+Create a config/application.rb 
+
+This will look at the HTTP Method and path to determine what to do.
+
+It's a very simple router. 
 
 ```
+ # This is the Application class. 
+ # It has only one method, call, which will accept HTTP Requests
+ # And return HTTP Responses.
+
+
 module PersonApp
   class PeopleService
+
+    # env is the Hash formed by the HTTP Request
     def call(env)
+
       request = Rack::Request.new(env)
       response = Rack::Response.new
       response_body = ""
 
-      # Simple router                                                           
-      # Will dispatch, call, Controller actions based on a URL path.
-      response_body = Router.dispatch(request)
+      path = request.path_info
+
+      if request.request_method == 'GET'
+        if path == '/people'
+          response_body = "Show all the people"
+        elsif path=~ /\/people\/+\d/
+          puts "path is #{path}"
+          id = path.split("/").last.to_i
+          response_body = "Show one person with id = #{id}"
+        end
+      elsif request.request_method == 'POST'
+      elsif request.request_method == 'PUT'        
+      elsif request.request_method == 'PATCH'                
+      elsif request.request_method == 'DELETE'                        
+      esle
+
+      end
+
       response.write(response_body)
+      # Need this to calc the Content-Length Response header
       response.finish
+    end
+  end
+
+end
+```
+
+Goto http://localhost:3000/people and http://localhost:3000/people/4.
+
+
+### Create a PeopleController.
+
+In the app/controller/people_controller.rb
+
+```
+module PersonApp
+  class PeopleController
+
+    def index
+      "In the PeopleController#index method"
+    end
+
+    def show 
+      "In the PeopleController#show method"      
+    end
+  end
+end
+```
+
+In the config/application.rb file change.  
+
+```
+if path == '/people'
+  response_body = PersonApp::PeopleController.new.index
+elsif path=~ /\/people\/+\d/
+  id = path.split("/").last.to_i
+  response_body = PersonApp::PeopleController.new.show
+end
+```
+
+This will route to the correct Controller and action.
+
+#### Handle HTTRequest params for the show action.
+
+Add a app/controllers/application.rb.  
+
+Added a params hash and a method to populate the params hash from the path.
+
+```
+module PersonApp
+  class ApplicationController
+    attr_accessor :params
+    def initialize()
+      @params = {}
+    end
+
+    def path_to_params(path)
+      id = path.split("/").last.to_i
+      @params.merge!({id: id})
     end
   end
 end
 ```
 
 
+In the config/application.rb change.
+
+```
+elsif path=~ /\/people\/+\d/
+          controller = PersonApp::PeopleController.new
+          controller.path_to_params(path)
+          response_body = controller.show
+```
+
+In the app/controllers/people_controller.rb.  
+
+```
+def show 
+ "In the PeopleController#show with params = #{params.inspect}"      
+end
+
+```

@@ -17,11 +17,11 @@ module PersonApp
 
       if request.request_method == 'GET'
         if path == '/people'
-          response_body = "Show all the people"
+          response_body = PersonApp::PeopleController.new.index
         elsif path=~ /\/people\/+\d/
-          puts "path is #{path}"
-          id = path.split("/").last.to_i
-          response_body = "Show one person with id = #{id}"
+          controller = PersonApp::PeopleController.new
+          controller.path_to_params(path)
+          response_body = controller.show
         end
       elsif request.request_method == 'POST'
       elsif request.request_method == 'PUT'        
