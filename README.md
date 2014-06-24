@@ -1,10 +1,35 @@
-## Rails Lite
+#### Building Rails Lite
 
-We are going to create a very minimal Rails application that mimics the structure and behavior of a Rails app. 
+We are going to build an application from Ruby, Rack and ActiveSupport. 
 
-We are going to follow the path that a HTTP Request would take through a Rails app, _creating components as needed_.
+The objective of this lesson is show how Rails works from the inside. This will incrementally build a _Lite_ version of some of the Rails components. 
+
+It will:  
+* Create an Rails _like_ initialization process.  
+* Use the Rails directory structure.  
+* Create a Rackup to process HTTP Requests.  
+* Implementing a simple Router that will _dispatch_ HTTP Requests to the correct controller and action.  
+* Implement a Controller and two actions, (index and show).  
+* Implement a view using a _render_ method and erubis.
 
 
+We've already seen Rack.  
+
+ActiveSupport is one of the gems that make up RubyOnRails. It will extend a set of Ruby files, (Array, Hash, String, ..), and provide some naming and other behavior. Feel free to checkout ActiveSupport.
+
+Later we'll also be using the Erubis gem that will provide _Templating_ to generate a HTML _Representation_ of our resources.  
+
+Rails uses ERB for Templating but Erubis is very similar.
+
+#### Add ActiveSupport.
+
+ActiveSupport is one of the gems used in rails. It creates a set of methods that extend Ruby classes. Check out the docs for ActiveSupport.
+
+Add this to Gemfile.  
+
+``` 
+gem 'active_support'
+```
 ### Create the directory structure
 
 * Rails keeps it's controllers and models in the app directory.  
@@ -22,169 +47,185 @@ mkdir config
 
 * A collection of other ruby files are keep in the lib directory.  
 
-	We are, _unlike in Rails_, create a lib/rails dir that will contain ruby that typically is provided by one of the rails gems.
+	We are, _unlike in Rails_, creating a lib/rails dir that will contain ruby that typically is provided by one of the rails gems.
 
 ```
 mkdir lib
 mkdir -p lib/rails
 ```
-
-
-### Create the Rackup
-
-Yep, this is how rails starts itself.  
+### Create a Rackup, config.ru
+Create a rackup. This will initialize, or _bring up_, the application when the rackup command is invoked on the command line.
 
 ```
-touch config.ru
-```
+ #\ -p 3000
 
-Add this to the config.ru  
+ # Above will Run this rackup on port 3000
 
-```
- #\ -p 3000                                                                      
- # Above will Run this rackup on port 3000                                       
-
- # setup the environment                                                         
+ # setup the environment
  require ::File.expand_path('../config/environment',  __FILE__)
 
- # Run the Rack app.                                                             
+ # Run the Rack app.
  run PersonApp::PeopleService.new
+
 ```
 
-### Create the setup, initialization,code.
 
-The config/environment.rb file will require all the files from directories.  
+### Create an enviroment.
+The config/environment.rb file will require all the files from directories.
 
 ```
 require 'pry'
 
- # Rails sets this global variable that points to the root directory
 $RAILS_ROOT = "#{__FILE__.split('/')[0..-3].join('/')}"
+
+ # Get active support help                                                       
+require 'active_support/all'
 
  # Require all of the rails files in these directories                           
 Dir["#{$RAILS_ROOT}/app/controllers/**/*.rb"].each { |f| require(f) }
 Dir["#{$RAILS_ROOT}/app/models/**/*.rb"].each { |f| require(f) }
 Dir["#{$RAILS_ROOT}/lib/**/*.rb"].each { |f| require(f) }
 
- # Require the file that defines the routes                                                            
-require_relative './route.rb'
-
- # Require the Rack app                                                          
-require_relative './application'
-
- # Create the People, power to the people, right on.                             
-require_relative '../lib/seed_people'
+require_relative "./application.rb"
 
 ```
 
-The applicaton.rb file defines the Rack application. _Mucho importante_.
+### Create the Application class. This defines the Rack application. _Mucho importante_.
+
+Create a config/application.rb 
+
+This will look at the HTTP Request method and path to determine what to do.
+
+It's a very simple router. 
 
 ```
+ # This is the Application class. 
+ # It has only one method, call, which will accept HTTP Requests
+ # And return HTTP Responses.
+
+
 module PersonApp
   class PeopleService
+
+    # env is the Hash formed by the HTTP Request
     def call(env)
+
       request = Rack::Request.new(env)
       response = Rack::Response.new
       response_body = ""
 
-      # Simple router                                                           
-      # Will dispatch, call, Controller actions based on a URL path.
-      response_body = Router.dispatch(request)
+      path = request.path_info
+
+      if request.request_method == 'GET'
+        if path == '/people'
+          response_body = "Show all the people"
+        elsif path=~ /\/people\/+\d/
+          puts "path is #{path}"
+          id = path.split("/").last.to_i
+          response_body = "Show one person with id = #{id}"
+        end
+      elsif request.request_method == 'POST'
+      elsif request.request_method == 'PUT'        
+      elsif request.request_method == 'PATCH'                
+      elsif request.request_method == 'DELETE'                        
+      esle
+
+      end
+
       response.write(response_body)
+      # Need this to calc the Content-Length Response header
       response.finish
     end
   end
+
 end
 ```
 
-The config/route.rb file defines the __mappings__ between the URL path and the Rails controller and action.  
- _Remember that a controller is just a Ruby class. And an action is just a method_
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
+
+
+### Create a PeopleController.
+
+In the app/controller/people_controller.rb
 
 ```
 module PersonApp
-  Router.get('/people', "person#index")
-  Router.get('/people/:id', "person#show")
-end
-
-```
-#### Create a Person Controller.
-
-A Controller will be called by the router to handle a HTTP request.  
-
-In app/controller/persons_controller.rb.  
-
-Note: The layout is a method in the ApplicationController. It wrap the HTML generated by the Controller actions.
-
-```
-module PersonApp
-
-  class PersonController < ApplicationController
+  class PeopleController
 
     def index
-      @people = Person.all
-      layout do
-        contents = ''
-        @people.each do |person|
-          contents += render('html',  person)
-        end
-        contents
-      end
+      "In the PeopleController#index method"
     end
 
-    def show
-      @person = Person.find(params[:id])
-      layout do
-        render 'html', @person
-      end
+    def show 
+      "In the PeopleController#show method"      
     end
   end
-
 end
 ```
 
-### Create an Application Controller class.
+In the config/application.rb file change.  
 
-This is the base class of all of your application's controllers.  
-In app/controllers/application_controller.rb.  
+```
+if path == '/people'
+  response_body = PersonApp::PeopleController.new.index
+elsif path=~ /\/people\/+\d/
+  id = path.split("/").last.to_i
+  response_body = PersonApp::PeopleController.new.show
+end
+```
 
-_We've hacked the layout here, typically the layout is NOT in the application controller_
+This will route to the correct Controller and action.
 
-```  
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
+
+
+#### Handle HTTRequest params for the show action.
+
+Add a app/controllers/application.rb.  
+
+Added a params hash and a method to populate the params hash from the path.
+
+```
 module PersonApp
-
   class ApplicationController
     attr_accessor :params
-
-	# Wrap the contents returned from the block in 
-	# standard HTML.    
-    def layout(&block)
-      contents = '<html><head><title>People App</title></head><body>'
-
-      # invoke the block passed to this method
-      contents += yield
-      contents += '</body></html>'
+    def initialize()
+      @params = {}
     end
 
-    def render(type, object)
-      contents = ""
-      if type == 'html'
-        contents += object.to_html
-      elsif type == 'json'
-        # TODO: 
-        contents += object.to_json
-      else
-        contents += object.to_html
-      end
-      contents
+    def path_to_params(path)
+      id = path.split("/").last.to_i
+      @params.merge!({id: id})
     end
   end
+end
+```
+
+
+In the config/application.rb change.
+
+```
+elsif path=~ /\/people\/+\d/
+          controller = PersonApp::PeopleController.new
+          controller.path_to_params(path)
+          response_body = controller.show
+```
+
+In the app/controllers/people_controller.rb.  
+
+```
+def show 
+ "In the PeopleController#show with params = #{params.inspect}"      
 end
 
 ```
 
-### Create the Person class.
+__Goto http://localhost:3000/people and http://localhost:3000/people/4.__
 
-This would typically be a Rails model, but we're using a Plain Ole Ruby Object (PORO) for now. In app/models/person.rb.  
+
+### Create a (fake) Peson model.
+
+In the app/models/person.rb file.
 
 ```
 module PersonApp
@@ -201,7 +242,7 @@ module PersonApp
     def self.find(index)
       @@people[index.to_i]
     end
-    
+
     attr_accessor :name, :description, :agee
 
     def initialize(name, description, age)
@@ -213,103 +254,202 @@ module PersonApp
     end
   end
 end
-
 ```
 
+### Create a file that will populate the people.
 
-### Create a Utils class.
+In lib/seed_people.rb.  
 
-This will provide assorted methods used in the app. Now need to know the implementation.
+```
+require 'faker'
+require_relative './utils'
 
-Create a lib/utils.rb file.   
+people_num = 5
+puts "Creating #{people_num} people"
+
+people_num.times do |i|
+  PersonApp::Person.create(Faker::Name.name, Faker::Name.title, rand(110))
+end
+```
+
+### Use these "models" in the controller actions.
+Add some html to the app/controllers/application_controller.rb
+
+```
+ LAYOUT_HTML_PRE = '<html><head></head><body>'
+ LAYOUT_HTML_POST = '</body></html>'
+```
+
+In the app/controllers/people_controller.rb.  
 
 ```
 module PersonApp
-  class Utils
-    def self.random_price
-      (rand(1..10).to_f + rand(1..100).to_f/100).round(2)
+  class PeopleController < ApplicationController
+
+    def index
+      @people = People.all
+
+      # render the HTML
+      content = LAYOUT_HTML_PRE
+      @people.each do |person|
+        content += person.to_html
+      end
+      content += LAYOUT_HTML_POST
     end
 
-    # Extract the ID from the path into a params hash
-    def self.extract_params(request)
-      params = { }.merge(request.params)
-      if request.path_info.include?(':')
-        # TODO: fix, only good when at end of path
-        id = path.split(':').last.to_i
-        params.merge!({id: id})
-      end
-      params
+    def show 
+      @person = Person.find(params[:id])
+      content = LAYOUT_HTML_PRE
+      content += @person.to_html
+      content += LAYOUT_HTML_POST
     end
-    
   end
 end
 ```
 
-#### Create a Router class.
+In the config/application.rb 
 
-This is an approximation of the much more complex router used in Rails. _No need to know the specifics of the implementation here_.
+Set the HTTP Response Content Type to html.  
 
-In lib/rails/router.rb  
+```
+ response.header['Content-Type'] = 'text/html'
+
+```
+
+### Refactor the rendering.
+
+In the app/controllers/application_controller.rb.  
+
+Add a method to render. 
+
+```
+def render(object)
+      content = LAYOUT_HTML_PRE
+      if object.respond_to?(:each)
+        object.each do |model|
+          content += model.to_html          
+        end
+      else
+        content += object.to_html
+      end
+      content += LAYOUT_HTML_POST
+end
+```
+
+
+Update the app/controllers/people_controller.rb.  
 
 ```
 module PersonApp
-  class Router
-    # A Hash of all the routes.
-    # The key is the path from the URL
-    # The value is a hash of the controller class and action name.
-    # {controller: PersonController, action: action_name}
-    @@routes = {
-      'GET' => { },
-      'POST' =>  { },
-      'PUT' => { },
-      'PATCH' => { },
-      'DELETE' => { }                  
-    }
+  class PeopleController < ApplicationController
 
-    # Map get request to a path
-    # path - /people
-    # controller_action_str - 'persons#index'
-    def self.get(path, controller_action_str)
-      controller_name, action_name = controller_action_str.split('#')
-      
-      controller_name.capitalize! # TODO CamelCase
-      controller_name += 'Controller'
-       
-      # Get the controller class from name, "PersonController"
-      controller_klass = ::PersonApp.const_get(controller_name)
+    def index
+      @people = Person.all
 
-      # Add the mapping from the URL path to the controller and action.
-      @@routes['GET'][path] = {controller: controller_klass, action: action_name }
+      # render the HTML
+      render @people
     end
 
-    def self.dispatch(request)
-      # URL Path
-      path = request.path_info
-      # HTTP method
-      http_method = request.request_method
-      
-      # See if path is in routes.
-      controller_action_hash = @@routes[http_method][path]
-
-      if !controller_action_hash
-        # no path in routes, replace last segment with :id
-        path = path.split('/')[0..-2].join('/') + '/:id'
-        controller_action_hash = @@routes[http_method][path]
-      end
-      # The controller class
-      controller_klass = controller_action_hash[:controller]
-      # The action name
-      action =  controller_action_hash[:action]
-      # Create an instance of the controller
-      controller_obj = controller_klass.new
-      # Set the controller's params
-      controller_obj.params = Utils.extract_params(request)
-      # Call the controller action
-      controller_obj.send(action.to_sym)
+    def show 
+      @person = Person.find(params[:id])
+      render @person
     end
   end
 end
+```
+
+## View Templates for Rendering.
+
+We are going to use Erubis, _much like ERB in Rails_ , for a templating library. 
+
+Templates generate HTML but can __also__ have ruby embedded in them. We'll see how this works below.
+
+
+##### Install the erubis gem and require it.
+
+* In the Gemfile. 
 
 ```
+gem 'erubis'
+```
+
+Run bundle install.
+
+* In the config/environment.rb file add the below after $RAILS_ROOT.  
+
+```
+ # Get active support help                                                   
+require 'active_support/all'
+
+ # For view templates.                                                       
+require 'erubis'
+```
+
+#### Use erubis to render.
+
+In the app/controllers/application_controller.rb. Remove the render method and replace it with the below.
+
+```
+...
+
+attr_accessor :params, :controller, :action
+...
+
+def controller
+  @controller = self.class.name.split("Controller").first
+  # remove the module name
+  @controller = @controller.split("::").last.underscore
+end
+
+def view_filename
+  "#{$RAILS_ROOT}/app/views/#{self.controller}/#{self.action}.html.erb"
+end
+
+def render(view_name, locals = {})
+  self.action = calling_method = caller[0].split("`").pop.gsub("'", "")     
+  template = File.read(view_filename)
+  eruby = Erubis::Eruby.new(template)
+  eruby.result(binding())
+end
+
+```
+
+##### Create the Views for people.
+
+View templates alway live in the app/views/<resource>/<action>.html.erb files.
+
+
+```
+mkdir -p app/views/people
+touch app/views/people/show.html.erb
+touch app/views/people/index.html.erb
+```
+
+Add the contents to the show view.
+
+In app/views/people/show.html.erb.  
+
+```
+<dt><%= @person.name %> </dt>
+<dd><%= @person.description %> is <%= @person.age %> years old</dd>
+
+```
+
+
+In app/views/people/index.html.erb 
+
+```
+	<dl>
+	  <% @people.each do |person| %>
+	    <dt><%= person.name %> </dt>
+	    <dd><%= person.description %> is <%= person.age %> years old</dd>
+	  <% end %>
+	</dl>
+```
+
+
+
+
+
 
 
