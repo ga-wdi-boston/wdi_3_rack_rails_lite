@@ -13,6 +13,7 @@ GEM
     coderay (1.1.0)
     columnize (0.8.9)
     debugger-linecache (1.2.0)
+    erubis (2.7.0)
     faker (1.3.0)
       i18n (~> 0.5)
     i18n (0.6.9)
@@ -37,6 +38,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
+  erubis
   faker
   pry
   pry-byebug

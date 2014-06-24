@@ -10,3 +10,7 @@ gem 'pry-byebug'
 gem 'faker'
 
 gem 'activesupport'
+
+
+gem 'erubis'
+
