@@ -1,6 +1,6 @@
 module PersonApp
 
-  class PersonController < ApplicationController
+  class PeopleController < ApplicationController
 
     def index
       @people = Person.all

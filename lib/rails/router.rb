@@ -17,10 +17,10 @@ module PersonApp
     # controller_action_str - 'persons#index'
     def self.get(path, controller_action_str)
       controller_name, action_name = controller_action_str.split('#')
-      
-      controller_name.capitalize! # TODO CamelCase
-      controller_name += 'Controller'
-       
+
+      # Form the Controller class name
+      controller_name =  controller_name.pluralize.camelize + 'Controller'
+
       # Get the controller class from name, "PersonController"
       controller_klass = ::PersonApp.const_get(controller_name)
 
