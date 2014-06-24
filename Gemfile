@@ -8,3 +8,4 @@ gem 'pry'
 gem 'pry-byebug'
 
 gem 'faker'
+gem 'activesupport'
