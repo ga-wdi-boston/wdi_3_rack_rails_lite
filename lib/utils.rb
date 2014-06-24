@@ -5,10 +5,11 @@ module PersonApp
     end
 
     # Extract the ID from the path into a params hash
-    def self.extract_params(request, path="")
+    def self.extract_params(request)
       params = { }.merge(request.params)
-      unless path.empty?
-        id = path.split('/').last.to_i
+      if request.path_info.include?(':')
+        # TODO: fix, only good when at end of path
+        id = path.split(':').last.to_i
         params.merge!({id: id})
       end
       params
