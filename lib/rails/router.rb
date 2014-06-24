@@ -37,11 +37,9 @@ module PersonApp
       # See if path is in routes.
       controller_action_hash = @@routes[http_method][path]
 
-      if !controller_action_hash
-        # no path in routes, replace last segment with :id
-        path = path.split('/')[0..-2].join('/') + '/:id'
-        controller_action_hash = @@routes[http_method][path]
-      end
+      # no path in routes, maybe it has an :id segment?
+      controller_action_hash = self.id_segment(path,http_method) unless controller_action_hash
+
       # The controller class
       controller_klass = controller_action_hash[:controller]
       # The action name
@@ -52,6 +50,14 @@ module PersonApp
       controller_obj.params = Utils.extract_params(request)
       # Call the controller action
       controller_obj.send(action.to_sym)
+    end
+
+    private
+
+    def self.id_segment(path, http_method)
+      # no path in routes, replace last segment with :id
+      path = path.split('/')[0..-2].join('/') + '/:id'
+      @@routes[http_method][path]
     end
   end
 end
