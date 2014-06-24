@@ -244,4 +244,49 @@ people_num.times do |i|
 end
 ```
 
+### Use these "models" in the controller actions.
+Add some html to the app/controllers/application_controller.rb
+
+```
+ LAYOUT_HTML_PRE = '<html><head></head><body>'
+ LAYOUT_HTML_POST = '</body></html>'
+```
+
+In the app/controllers/people_controller.rb.  
+
+```
+module PersonApp
+  class PeopleController < ApplicationController
+
+    def index
+      @people = People.all
+
+      # render the HTML
+      content = LAYOUT_HTML_PRE
+      @people.each do |person|
+        content += person.to_html
+      end
+      content += LAYOUT_HTML_POST
+    end
+
+    def show 
+      @person = Person.find(params[:id])
+      content = LAYOUT_HTML_PRE
+      content += @person.to_html
+      content += LAYOUT_HTML_POST
+    end
+  end
+end
+```
+
+In the config/application.rb 
+
+Set the HTTP Response Content Type to html.  
+
+```
+ response.header['Content-Type'] = 'text/html'
+
+```
+
+
 

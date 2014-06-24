@@ -1,6 +1,11 @@
 module PersonApp
   class ApplicationController
+
+    LAYOUT_HTML_PRE = '<html><head></head><body>'
+    LAYOUT_HTML_POST = '</body></html>'
+
     attr_accessor :params
+    
     def initialize()
       @params = {}
     end

@@ -1,5 +1,4 @@
 require 'faker'
-require_relative './utils'
 
 people_num = 5
 puts "Creating #{people_num} people"

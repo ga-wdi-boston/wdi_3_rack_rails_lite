@@ -30,7 +30,8 @@ module PersonApp
       esle
 
       end
-
+      response.header['Content-Type'] = 'text/html'
+      
       response.write(response_body)
       # Need this to calc the Content-Length Response header
       response.finish
