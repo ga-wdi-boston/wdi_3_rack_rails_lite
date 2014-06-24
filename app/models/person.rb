@@ -13,7 +13,7 @@ module PersonApp
       @@people[index.to_i]
     end
 
-    attr_accessor :name, :description, :agee
+    attr_accessor :name, :description, :age
 
     def initialize(name, description, age)
       @name, @description, @age = name, description, age
