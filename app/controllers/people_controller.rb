@@ -5,12 +5,12 @@ module PersonApp
       @people = Person.all
 
       # render the HTML
-      render @people
+      render()
     end
 
     def show 
       @person = Person.find(params[:id])
-      render @person
+      render
     end
   end
 end
