@@ -1,8 +1,6 @@
-# This is the Application class. 
+# This is the Application class.
 # It has only one method, call, which will accept HTTP Requests
 # And return HTTP Responses.
-
-
 module PersonApp
   class PeopleService
 
@@ -24,14 +22,14 @@ module PersonApp
           response_body = controller.show
         end
       elsif request.request_method == 'POST'
-      elsif request.request_method == 'PUT'        
-      elsif request.request_method == 'PATCH'                
-      elsif request.request_method == 'DELETE'                        
-      esle
+      elsif request.request_method == 'PUT'
+      elsif request.request_method == 'PATCH'
+      elsif request.request_method == 'DELETE'
+      else
 
       end
       response.header['Content-Type'] = 'text/html'
-      
+
       response.write(response_body)
       # Need this to calc the Content-Length Response header
       response.finish
