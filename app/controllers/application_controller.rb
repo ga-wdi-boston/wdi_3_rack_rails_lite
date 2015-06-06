@@ -4,31 +4,33 @@ module SongsApp
     LAYOUT_HTML_PRE = '<html><head></head><body>'
     LAYOUT_HTML_POST = '</body></html>'
 
-    attr_accessor :params, :controller, :action
+    attr_accessor :params,:action
 
-    def initialize()
-      @params = {}
+    def initialize(controller, action, params)
+      @controller = controller
+      @action = action
+      @params = params
     end
 
     # WARNING! Absolutely, no need to know this implementation.
     # determine the name of the current controller.
-    def controller
-      @controller = self.class.name.split("Controller").first
+    def controller_filename
+      @controller_filename = self.class.name.split("Controller").first
       # remove the module name
-      @controller = @controller.split("::").last.underscore
+      @controller_filename = @controller_filename.split("::").last.underscore
     end
 
     # WARNING! Absolutely, no need to know this implementation.
     # Generate the absolute path of the view template file.
     def view_filename
-      "#{$RAILS_ROOT}/app/views/#{self.controller}/#{self.action}.html.erb"
+      "#{$RAILS_ROOT}/app/views/#{self.controller_filename}/#{self.action}.html.erb"
     end
 
     # find the id in the path, ex. /people/4, will return 4
-    def path_to_params(path)
-      id = path.split("/").last.to_i
-      @params.merge!({id: id})
-    end
+    # def path_to_params(path)
+    #   id = path.split("/").last.to_i
+    #   @params.merge!({id: id})
+    # end
 
     # WARNING! Absolutely, no need to know this implementation.
     # Process the view template associated with the action
@@ -39,7 +41,7 @@ module SongsApp
       # the stack trace
       # /Users/tdyer/GeneralAssembly/ga-wdi-boston/wdi_3_rack_rails_lite/app/controllers/people_controller.rb:13:in `show'
       # puts "ApplicationController: caller[0] is #{caller[0]}"
-      self.action = caller[0].split("`").pop.gsub("'", "")
+      # self.action = caller[0].split("`").pop.gsub("'", "")
 
       # Now we can determine the view, *.html.erb, file path
       template = File.read(view_filename)

@@ -3,6 +3,7 @@ module SongsApp
 
     def index
       @songs = Song.all
+      # TODO: error handling
 
       # render the HTML
       render()
@@ -10,6 +11,7 @@ module SongsApp
 
     def show
       @song = Song.find(params[:id])
+      # TODO: error handling
       render
     end
   end
