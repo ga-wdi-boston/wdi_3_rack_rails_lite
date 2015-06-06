@@ -1,7 +1,4 @@
 class Router
-  class << self
-    attr_reader :app_namespace
-  end
 
   @routes = { get: [],
               post: [],
@@ -21,17 +18,14 @@ class Router
       define_method(http_method) do |path, controller_action_str|
         controller_name, action_name = controller_action_str.split('#')
         controller_name = "#{controller_name.classify.pluralize}Controller"
-        @routes[http_method] << {path: path,
-                                 controller_name: controller_name,
-                                 action_name: action_name}
+        @routes[http_method] << Route.new(path,controller_name, action_name)
       end
     end
   end
 
   # define the routes
   def self.draw(app_namespace, &block)
-    @app_namespace = app_namespace
-
+    Route.app_namespace = app_namespace
     if block_given?
       block.arity < 1 ? instance_eval(&block) : block.call(self)
     end
@@ -41,22 +35,20 @@ class Router
   def self.dispatch(http_method, path)
 
     route_entries = @routes[http_method.downcase.to_sym]
-    entry = route_entries.select { |entry| entry[:path] == path }.first
+    route = route_entries.select { |route| route.path == path }.first
 
-    unless entry
+    if !route
       "No Route for #{http_method} - #{path}"
     else
-      keys = entry.map do |e|
-        e[1..-1] if  e.index(':')
-      end.compact
+      # keys = entry.map do |e|
+      #   e[1..-1] if  e.index(':')
+      # end.compact
 
-      values = entry.map do |e|
-        |e| e if e =~ /\d/
-      end.compact
-
-      controller_name = "#{@app_namespace}::#{entry[:controller_name]}"
-      controller = controller_name.constantize.new
-      controller.send(entry[:action_name])
+      # values = entry.map do |e|
+      #   |e| e if e =~ /\d/
+      # end.compact
+      byebug
+      route.invoke_action
     end
   end
 end
