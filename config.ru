@@ -1,6 +1,5 @@
-#rackup -p 3000
-
-# Above will Run this rackup on port 3000
+# To run on port 3000, like rails
+# rackup -p 3000
 
 # setup the environment
 require ::File.expand_path('../config/environment',  __FILE__)

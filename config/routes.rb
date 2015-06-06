@@ -1,4 +1,4 @@
-# create the routes, PersonApp will be the application namespace.
+# create the routes, SongApp will be the application namespace.
 Router.draw('SongsApp') do
   puts "Routes"
   get "/songs", "songs#index"

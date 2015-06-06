@@ -1,17 +1,29 @@
 module SongsApp
   class Song
+    # Fake DB, just a class instance variable
+    # All songs will go away, poof, when you quit the 
+    # app.
     @songs = []
 
-    def self.all
-      @songs
-    end
-    def self.create(name, description, duration, price)
-      @songs << Song.new(name, description, duration, price)
-    end
+    # Class methods
+    class << self
 
-    def self.find(index)
-      @songs[index.to_i]
-    end
+      # All Songs.
+      def all
+        @songs
+      end
+
+      # Factory method to create a Song.
+      def create(name, description, duration, price)
+        @songs << Song.new(name, description, duration, price)
+      end
+
+      # Find a Song given it's index
+      def find(index)
+        @songs[index.to_i]
+      end
+
+    end # end of class methods
 
     attr_accessor :name, :description, :duration, :price
 
@@ -19,11 +31,5 @@ module SongsApp
       @name, @description, @duraton, @price = name, description, duration, price
     end
 
-    def to_html
-      html = "<dt>Name</dt><dd>#{name}</dd>"
-      html << "<dt>Description</dt><dd>#{description}</dd>"
-      html << "<dt>Duration</dt><dd>#{duration}</dd>"
-      html << "<dt>Price</dt><dd>#{price}</dd>"
-    end
   end
 end

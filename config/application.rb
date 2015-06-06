@@ -13,7 +13,11 @@ module SongsApp
 
       path = request.path_info
 
+      # Dispatch to a Controller and Action and 
+      # return a representation of a resource.
       response_body = Router.dispatch(request.request_method, path)
+
+      # TODO: Just HTML for now
       response.header['Content-Type'] = 'text/html'
 
       response.write(response_body)
