@@ -16,3 +16,4 @@ Dir["#{$RAILS_ROOT}/app/models/**/*.rb"].each { |f| require(f) }
 Dir["#{$RAILS_ROOT}/lib/**/*.rb"].each { |f| require(f) }
 
 require_relative "./application.rb"
+require_relative "./routes.rb"

@@ -1,4 +1,4 @@
-module PersonApp
+module SongsApp
   class ApplicationController
 
     LAYOUT_HTML_PRE = '<html><head></head><body>'

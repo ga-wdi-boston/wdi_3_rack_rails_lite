@@ -1,4 +1,4 @@
-#\ -p 3000
+#rackup -p 3000
 
 # Above will Run this rackup on port 3000
 
@@ -6,5 +6,4 @@
 require ::File.expand_path('../config/environment',  __FILE__)
 
 # Run the Rack app.
-run PersonApp::PeopleService.new
-
+run SongsApp::SongsService.new
